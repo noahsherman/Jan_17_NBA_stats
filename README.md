@@ -7,3 +7,6 @@ Don't know how to pull data from NBA.com or basketball-reference.com yet so I ma
 Iterate through lines in Python_NBA_Test.txt to grab relevant stats: Name, Pts, TRB, AST
 
 If player had triple double or double double, stat line will display.
+
+
+edit: also learning how to use github -- this is a branch edit
