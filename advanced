@@ -1,0 +1,75 @@
+import datetime
+
+yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
+dd = yesterday.strftime("%d")
+mm = yesterday.strftime("%m")
+yy = yesterday.strftime("20%y")
+
+url = 'http://www.basketball-reference.com/friv/dailyleaders.cgi?month=' + mm + '&day=' + dd +'&year=' + yy
+
+import tweepy
+import time
+import sys
+
+argfile = str(sys.argv[0])
+
+CONSUMER_KEY = 'kqH5TonjbUMMcmoWV173ZIF79'
+CONSUMER_SECRET = 'KmgzECLh9K8l5gyl9D0YLiNrMte89vS8pEpwGb33zaq3JyIZbN'
+ACCESS_KEY = '824787926731071488-ygBH45IpRMEWEZcpYHZ3bdxlztFSGPj'
+ACCESS_SECRET = 'CywItYipir0daeTO1qzDw4zpInihEfyrJJHFZ64xYEc1d'
+
+auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
+api = tweepy.API(auth)
+
+from bs4 import BeautifulSoup
+import urllib2
+
+page = urllib2.urlopen(url)
+soup = BeautifulSoup(page, "lxml")
+right_table = soup.find('table', class_ = 'sortable stats_table')
+
+A=[]
+B=[]
+C=[]
+D=[]
+E=[]
+F=[]
+G=[]
+H=[]
+
+for row in right_table.findAll("tr"):
+    cells = row.findAll('td')
+    if len(cells) == 25:
+        A.append(cells[0].find(text=True))
+        B.append(cells[23].find(text=True))
+        C.append(cells[17].find(text=True))
+        D.append(cells[18].find(text=True))
+        E.append(cells[19].find(text=True))
+        F.append(cells[20].find(text=True))
+        G.append(cells[1].find(text=True))
+        H.append(cells[24].find(text=True))
+
+import pandas as pd
+
+df=pd.DataFrame(A, columns=['Name'])
+df['PTS'] = B
+df['REB'] = C
+df['AST'] = D
+df['STL'] = E
+df['BLK'] = F
+df['Tm'] = G
+df['GSc'] = H
+
+df[['PTS', 'REB', 'AST', 'STL', 'BLK', 'GSc']] = df[['PTS', 'REB', 'AST', 'STL', 'BLK', 'GSc']].apply(pd.to_numeric) 
+
+for index, row in df.iterrows():
+    if row['PTS'] >= 10 and row['AST'] >= 10 and row['REB'] >= 10:
+        api.update_status('%s (%s) had a triple double, with %s points, %s rebounds, and %s assists.' %(row['Name'], row['Tm'], row['PTS'], row['REB'], row['AST']))
+        time.sleep(30)
+    elif row['PTS'] >= 10 and row['AST'] >= 10 and row['REB'] < 10:
+        api.update_status('%s (%s) had a double double, with %s points and %s assists.' %(row['Name'], row['Tm'], row['PTS'], row['AST']))
+        time.sleep(30)
+    elif row['PTS'] >= 10 and row['AST'] < 10 and row['REB'] >= 10:
+        api.update_status('%s (%s) had a double double, with %s points and %s rebounds.' %(row['Name'], row['Tm'], row['PTS'], row['REB']))
+        time.sleep(30)
