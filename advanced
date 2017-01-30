@@ -37,6 +37,10 @@ E=[]
 F=[]
 G=[]
 H=[]
+I=[]
+J=[]
+K=[]
+
 
 for row in right_table.findAll("tr"):
     cells = row.findAll('td')
@@ -48,7 +52,11 @@ for row in right_table.findAll("tr"):
         E.append(cells[19].find(text=True))
         F.append(cells[20].find(text=True))
         G.append(cells[1].find(text=True))
-        H.append(cells[24].find(text=True))
+        H.append(cells[7].find(text=True))
+        I.append(cells[13].find(text=True))
+        J.append(cells[21].find(text=True))
+        K.append(cells[5].find(text=True))
+        
 
 import pandas as pd
 
@@ -59,17 +67,36 @@ df['AST'] = D
 df['STL'] = E
 df['BLK'] = F
 df['Tm'] = G
-df['GSc'] = H
+df['FGA'] = H
+df['FTA'] = I
+df['TO'] = J
+df['MP'] = K
 
-df[['PTS', 'REB', 'AST', 'STL', 'BLK', 'GSc']] = df[['PTS', 'REB', 'AST', 'STL', 'BLK', 'GSc']].apply(pd.to_numeric) 
+df[['PTS', 'REB', 'AST', 'STL', 'BLK', 'FGA', 'FTA', 'TO']] = df[['PTS', 'REB', 'AST', 'STL', 'BLK', 'FGA', 'FTA', 'TO']].apply(pd.to_numeric) 
 
 for index, row in df.iterrows():
     if row['PTS'] >= 10 and row['AST'] >= 10 and row['REB'] >= 10:
-        api.update_status('%s (%s) had a triple double, with %s points, %s rebounds, and %s assists.' %(row['Name'], row['Tm'], row['PTS'], row['REB'], row['AST']))
-        time.sleep(30)
+        api.update_status(yesterday.strftime('%m/%d/%y') + ': %s (%s) had a triple double, with %s points, %s rebounds, and %s assists.' %(row['Name'], row['Tm'], row['PTS'], row['REB'], row['AST']))
+        time.sleep(60)
     elif row['PTS'] >= 10 and row['AST'] >= 10 and row['REB'] < 10:
-        api.update_status('%s (%s) had a double double, with %s points and %s assists.' %(row['Name'], row['Tm'], row['PTS'], row['AST']))
-        time.sleep(30)
+        api.update_status(yesterday.strftime('%m/%d/%y') + ': %s (%s) had a double double, with %s points and %s assists.' %(row['Name'], row['Tm'], row['PTS'], row['AST']))
+        time.sleep(60)
     elif row['PTS'] >= 10 and row['AST'] < 10 and row['REB'] >= 10:
-        api.update_status('%s (%s) had a double double, with %s points and %s rebounds.' %(row['Name'], row['Tm'], row['PTS'], row['REB']))
-        time.sleep(30)
+        api.update_status(yesterday.strftime('%m/%d/%y') + ': %s (%s) had a double double, with %s points and %s rebounds.' %(row['Name'], row['Tm'], row['PTS'], row['REB']))
+        time.sleep(60)
+    elif row['PTS'] == 0 and row['REB'] == 0 and row['AST'] == 0 and row['BLK'] == 0 and row['STL'] == 0 and row['FGA'] == 0 and row['FTA'] == 0 and row['TO'] == 0:
+        api.update_status(yesterday.strftime('%m/%d/%y') + ': Trillionaire Club! In %s minutes, %s had no FGA, FGM, 3PA, 3PM, FTA, FTM, PTS, AST, REB, STL, BLK, or TO.' %(row['MP'], row['Name']))
+        time.sleep(60)
+    elif row['PTS'] >= 5 and row['REB'] >= 5 and row['AST'] >= 5 and row['STL'] >= 5 and row['BLK'] >= 5:
+        api.update_status(yesterday.strftime('%m/%d/%y') + ': %s acheived a 5x5, with %s points, %s rebounds, %s assists, %s steals, and %s blocks.' %(row['Name'], row['REB'], row['AST'], row['STL'], row['BLK'])
+        time.sleep(60)
+    elif row['PTS'] >= 5 and row['REB'] >= 5 and row['AST'] >= 5 and row['STL'] >= 2 and row['BLK'] >= 2:
+        api.update_status(yesterday.strftime('%m/%d/%y') + ': %s was close to a 5x5, needing %s steals and %s blocks to get there.' %(row['Name'], row['STL'], row['BLK'])
+        time.sleep(60)
+    else:
+        pass
+
+api.update_status(yesterday.strftime('%m/%d/%y') + ': The best game score of the day belonged to %s. He had %s points, %s rebounds, and %s assists in %s minutes.' %(df['Name'].iloc[0], df['PTS'].iloc[0], df['REB'].iloc[0], df['AST'].iloc[0], df['MP'].iloc[0]))
+time.sleep(60)
+api.update_status(yesterday.strftime('%m/%d/%y') + ': The worst game score of the day belonged to %s. He had %s points, %s rebounds, and %s assists in %s minutes.' %(df['Name'].iloc[-1], df['PTS'].iloc[-1], df['REB'].iloc[-1], df['AST'].iloc[-1], df['MP'].iloc[-1]))
+time.sleep(60)
